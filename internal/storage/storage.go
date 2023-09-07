@@ -1,5 +1,7 @@
 package storage
 
+import "fmt"
+
 type gauge float64
 type counter int64
 
@@ -23,4 +25,19 @@ func (s *MemStorage) UpdateCounter(name string, value int64) {
 
 func (s *MemStorage) UpdateGauge(name string, value float64) {
 	s.gaugeData[name] = gauge(value)
+}
+
+func (s *MemStorage) AllMetrics() string {
+	var result string
+	result += "Gauge metrics:\n"
+	for n, v := range s.gaugeData {
+		result += fmt.Sprintf("- %s = %f\n", n, v)
+	}
+
+	result += "Counter metrics:\n"
+	for n, v := range s.counterData {
+		result += fmt.Sprintf("- %s = %d\n", n, v)
+	}
+
+	return result
 }
