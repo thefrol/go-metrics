@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -14,8 +15,9 @@ import (
 var valuesGauge = map[string]float64{}
 var pollCount uint64
 
-const pollInterval = 2
-const reportInterval = 10
+var pollInterval int
+var reportInterval int
+var flagRunAddr string
 
 func getMetrics() {
 	var rtm runtime.MemStats
@@ -63,32 +65,25 @@ func postQueries() {
 
 func post(t string, name string, value string) {
 	bodyReader := bytes.NewReader([]byte{})
-	url := "http://localhost:8080/update/" + t + "/" + name + "/" + value
 
 	// We can set the content type here
-	resp, err := http.Post(url, "text/plain", bodyReader)
+	fmt.Println("Running server on", flagRunAddr)
+	fmt.Sprintf("POST to: http://%s/update/%s/%s/%s", flagRunAddr, t, name, value)
+	resp, err := http.Post(fmt.Sprintf("http://%s/update/%s/%s/%s", flagRunAddr, t, name, value), "text/plain", bodyReader)
+	//resp, err := http.Post(url, "text/plain", bodyReader)
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
 
 	fmt.Println("Status:", resp.Status)
-}
-func postAll() {
-	bodyReader := bytes.NewReader([]byte{})
-	url := "http://localhost:8080/update"
-
-	// We can set the content type here
-	resp, err := http.Post(url, "text/plain", bodyReader)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	fmt.Println(resp.Body, resp.Header)
-
-	fmt.Println("Status:", resp.Status)
+	fmt.Println("POST:", resp.Request)
 }
 func main() {
+	flag.StringVar(&flagRunAddr, "a", "localhost:8080", "address and port to run server")
+	flag.IntVar(&reportInterval, "r", 10, "frequency of sending metrics to the server")
+	flag.IntVar(&pollInterval, "p", 2, "frequency of polling metrics")
+	flag.Parse()
 	pollTicker := time.NewTicker(time.Duration(pollInterval) * time.Second)
 	defer pollTicker.Stop()
 	reportTicker := time.NewTicker(time.Duration(reportInterval) * time.Second)
