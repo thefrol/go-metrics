@@ -68,7 +68,6 @@ func post(t string, name string, value string) {
 
 	// We can set the content type here
 	fmt.Println("Running server on", flagRunAddr)
-	fmt.Sprintf("POST to: http://%s/update/%s/%s/%s", flagRunAddr, t, name, value)
 	resp, err := http.Post(fmt.Sprintf("http://%s/update/%s/%s/%s", flagRunAddr, t, name, value), "text/plain", bodyReader)
 	//resp, err := http.Post(url, "text/plain", bodyReader)
 	if err != nil {
