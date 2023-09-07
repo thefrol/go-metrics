@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	"github.com/Sofja96/go-metrics.git/internal/storage"
-	_ "github.com/Sofja96/go-metrics.git/internal/storage"
 	"net/http"
 	"strconv"
 	"strings"
