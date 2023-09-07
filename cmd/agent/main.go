@@ -74,7 +74,20 @@ func post(t string, name string, value string) {
 
 	fmt.Println("Status:", resp.Status)
 }
+func postAll() {
+	bodyReader := bytes.NewReader([]byte{})
+	url := "http://localhost:8080/update"
 
+	// We can set the content type here
+	resp, err := http.Post(url, "text/plain", bodyReader)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	fmt.Println(resp.Body, resp.Header)
+
+	fmt.Println("Status:", resp.Status)
+}
 func main() {
 	pollTicker := time.NewTicker(time.Duration(pollInterval) * time.Second)
 	defer pollTicker.Stop()

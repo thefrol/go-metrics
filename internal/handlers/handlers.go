@@ -3,59 +3,59 @@ package handlers
 import (
 	"fmt"
 	"github.com/Sofja96/go-metrics.git/internal/storage"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
-func Webhook(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		// разрешаем только POST-запросы
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-	s := storage.New()
-	sliceURL := strings.Split(r.URL.Path, "/")
+func Webhook(s *storage.MemStorage) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		metricsType := c.Param("typeM")
+		metricsName := c.Param("nameM")
+		metricsValue := c.Param("valueM")
 
-	if len(sliceURL) != 5 || sliceURL[1] != "update" {
-		w.WriteHeader(http.StatusNotFound)
-		return
+		if metricsType == "counter" {
+			if value, err := strconv.ParseInt(metricsValue, 10, 64); err == nil {
+				s.UpdateCounter(metricsName, value)
+			} else {
+				return c.String(http.StatusBadRequest, fmt.Sprintf("%s incorrect values(int) of metric", metricsValue))
+			}
+		} else if metricsType == "gauge" {
+			if value, err := strconv.ParseFloat(metricsValue, 64); err == nil {
+				s.UpdateGauge(metricsName, value)
+			} else {
+				return c.String(http.StatusBadRequest, fmt.Sprintf("%s incorrect values(float) of metric", metricsValue))
+			}
+		} else {
+			return c.String(http.StatusBadRequest, "Invalid metric type. Metric type can only be 'gauge' or 'counter'")
+		}
+
+		c.Response().Header().Set("Content-Type", "text/plain; charset=utf-8")
+		return c.String(http.StatusOK, "")
 	}
 
-	metricsType := sliceURL[2]
-	metricsName := sliceURL[3]
-	metricsValue := sliceURL[4]
-	if metricsType == "counter" {
-		if value, err := strconv.ParseInt(metricsValue, 10, 64); err == nil {
-			s.UpdateCounter(metricsName, value)
-		} else {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-	} else if metricsType == "gauge" {
-		if value, err := strconv.ParseFloat(metricsValue, 64); err == nil {
-			s.UpdateGauge(metricsName, value)
-		} else {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-	} else {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 }
+func ValueMetrics(s *storage.MemStorage) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		metricsType := c.Param("typeM")
+		metricsName := c.Param("nameM")
+		val, status := s.GetValue(metricsType, metricsName)
+		err := c.String(status, val)
+		if err != nil {
+			return err
+		}
 
-func AllMetrics(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		// разрешаем только GET-запросы
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
+		return nil
+
 	}
-	s := storage.New()
-	//data := ioutil.ReadAll(w.Body)
-	fmt.Println(string(s.AllMetrics()))
-	metric := s.AllMetrics()
-	fmt.Println(metric)
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+}
+func AllMetrics(s *storage.MemStorage) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		err := ctx.String(http.StatusOK, s.AllMetrics())
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
 }
