@@ -5,19 +5,28 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"runtime"
 	"strconv"
 	"time"
 )
 
+type Config struct {
+	address        string `env:"ADDRESS"`
+	reportInterval int    `env:"REPORT_INTERVAL"`
+	pollInterval   int    `env:"POLL_INTERVAL"`
+}
+
+var cfg Config
 var valuesGauge = map[string]float64{}
 var pollCount uint64
 
-var pollInterval int
-var reportInterval int
-var flagRunAddr string
+//var pollInterval int
+//var reportInterval int
+//var flagRunAddr string
 
 func getMetrics() {
 	var rtm runtime.MemStats
@@ -67,8 +76,8 @@ func post(t string, name string, value string) {
 	bodyReader := bytes.NewReader([]byte{})
 
 	// We can set the content type here
-	fmt.Println("Running server on", flagRunAddr)
-	resp, err := http.Post(fmt.Sprintf("http://%s/update/%s/%s/%s", flagRunAddr, t, name, value), "text/plain", bodyReader)
+	fmt.Println("Running server on", cfg.address)
+	resp, err := http.Post(fmt.Sprintf("http://%s/update/%s/%s/%s", cfg.address, t, name, value), "text/plain", bodyReader)
 	//resp, err := http.Post(url, "text/plain", bodyReader)
 	if err != nil {
 		panic(err)
@@ -78,14 +87,33 @@ func post(t string, name string, value string) {
 	fmt.Println("Status:", resp.Status)
 	fmt.Println("POST:", resp.Request)
 }
-func main() {
-	flag.StringVar(&flagRunAddr, "a", "localhost:8080", "address and port to run server")
-	flag.IntVar(&reportInterval, "r", 10, "frequency of sending metrics to the server")
-	flag.IntVar(&pollInterval, "p", 2, "frequency of polling metrics")
+
+func runParameters() error {
+	flag.StringVar(&cfg.address, "a", "localhost:8080", "address and port to run server")
+	flag.IntVar(&cfg.reportInterval, "r", 10, "frequency of sending metrics to the server")
+	flag.IntVar(&cfg.pollInterval, "p", 2, "frequency of polling metrics")
 	flag.Parse()
-	pollTicker := time.NewTicker(time.Duration(pollInterval) * time.Second)
+
+	if envRunAddr := os.Getenv("ADDRESS"); envRunAddr != "" {
+		cfg.address = envRunAddr
+	}
+	if envRunAddr := os.Getenv("REPORT_INTERVAL"); envRunAddr != "" {
+		cfg.reportInterval, _ = strconv.Atoi(envRunAddr)
+	}
+	if envRunAddr := os.Getenv("POLL_INTERVAL"); envRunAddr != "" {
+		cfg.pollInterval, _ = strconv.Atoi(envRunAddr)
+	}
+
+	return nil
+}
+func main() {
+	err := runParameters()
+	if err != nil {
+		log.Fatal(err)
+	}
+	pollTicker := time.NewTicker(time.Duration(cfg.pollInterval) * time.Second)
 	defer pollTicker.Stop()
-	reportTicker := time.NewTicker(time.Duration(reportInterval) * time.Second)
+	reportTicker := time.NewTicker(time.Duration(cfg.reportInterval) * time.Second)
 	defer reportTicker.Stop()
 
 	for {
