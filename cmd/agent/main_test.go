@@ -1,18 +1,29 @@
 package main
 
-import "testing"
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
 
 func Test_getMetrics(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			getMetrics()
-		})
-	}
+	assert := assert.New(t)
+	valueGauge := map[string]float64{}
+	t.Run("check not empty metric", func(t *testing.T) {
+
+		getMetrics()
+		b, _ := json.Marshal(valuesGauge)
+		fmt.Println(string(b))
+		assert.NotEmpty(t, valueGauge)
+	})
+	t.Run("test on get name metric", func(t *testing.T) {
+
+		getMetrics()
+		b, _ := json.Marshal(valuesGauge)
+		//	fmt.Println(string(b))
+		assert.Contains(string(b), "Alloc")
+	})
 }
 
 //func Test_post(t *testing.T) {
