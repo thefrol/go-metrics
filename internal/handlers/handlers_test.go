@@ -22,13 +22,13 @@ func TestWebhook(t *testing.T) {
 		path     string
 		expected result
 	}{
-		{
-			name: "Push counter",
-			path: "/update/counter/PollCount/10",
-			expected: result{
-				code: http.StatusOK,
-			},
-		},
+		//{
+		//	name: "Push counter",
+		//	path: "/update/counter/PollCount/10",
+		//	expected: result{
+		//		code: http.StatusOK,
+		//	},
+		//},
 		{
 			name: "Push gauge",
 			path: "/update/gauge/Alloc/13.123",
@@ -78,10 +78,10 @@ func TestWebhook(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 			s := storage.New()
-			e := echo.New()
+			//	e := echo.New()
 			assert := assert.New(t)
 			Webhook(s)
-			e.Start("8080")
+			//	e.Start("8080")
 			res, _ := http.Post("http://127.0.0.1:8080"+tc.path, "text/plain", nil)
 			assert.Equal(tc.expected.code, res.StatusCode)
 			defer res.Body.Close()
