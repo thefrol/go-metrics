@@ -131,6 +131,7 @@ func TestAllMetrics(t *testing.T) {
 				respBody, err := io.ReadAll(res.Body)
 				require.NoError(t, err)
 				assert.NotEmpty(len(respBody))
+				defer res.Body.Close()
 			}
 		})
 	}
