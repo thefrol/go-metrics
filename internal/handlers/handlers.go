@@ -8,7 +8,10 @@ import (
 	"strconv"
 )
 
-func Webhook(s *storage.MemStorage) echo.HandlerFunc {
+// TODO
+// Во всех хендлерах необходимо использовать не конкретный Storage, а интерфейс.
+// В дальнейшем мы будем реализовывать Storage, который ходит в базу данных
+func Webhook(metrics storage.Metrics) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		metricsType := c.Param("typeM")
 		metricsName := c.Param("nameM")
@@ -16,13 +19,13 @@ func Webhook(s *storage.MemStorage) echo.HandlerFunc {
 
 		if metricsType == "counter" {
 			if value, err := strconv.ParseInt(metricsValue, 10, 64); err == nil {
-				s.UpdateCounter(metricsName, value)
+				metrics.UpdateCounter(metricsName, value)
 			} else {
 				return c.String(http.StatusBadRequest, fmt.Sprintf("%s incorrect values(int) of metric", metricsValue))
 			}
 		} else if metricsType == "gauge" {
 			if value, err := strconv.ParseFloat(metricsValue, 64); err == nil {
-				s.UpdateGauge(metricsName, value)
+				metrics.UpdateGauge(metricsName, value)
 			} else {
 				return c.String(http.StatusBadRequest, fmt.Sprintf("%s incorrect values(float) of metric", metricsValue))
 			}
@@ -35,20 +38,42 @@ func Webhook(s *storage.MemStorage) echo.HandlerFunc {
 	}
 
 }
-func ValueMetrics(s *storage.MemStorage) echo.HandlerFunc {
+
+func ValueMetrics(metrics storage.Metrics) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		metricsType := c.Param("typeM")
 		metricsName := c.Param("nameM")
-		val, status := s.GetValue(metricsType, metricsName)
-		err := c.String(status, val)
+		if len(metrics.GetValue(metricsType, metricsName)) == 0 {
+			return c.String(http.StatusNotFound, "")
+		}
+		err := c.String(http.StatusOK, metrics.GetValue(metricsType, metricsName))
 		if err != nil {
 			return err
 		}
 
 		return nil
-
 	}
 }
+
+//func AllMetrics(s *storage.MemStorage) echo.HandlerFunc {
+//	return func(c echo.Context) error {
+//		//metricsName := c.Param("nameM")
+//		//metricsValue := c.Param("valueM")
+//		//for name, value := range s.GetAll() {
+//		//		result += fmt.Sprintf("- %s = %d\n", name, value)
+//		//	}
+//		s.GetAll()
+//		//err := c.String(http.StatusOK)
+//		//if err != nil {
+//		//	return err
+//		//}
+//
+//		//	return nil
+//		//}
+//		return nil
+//	}
+//}
+
 func AllMetrics(s *storage.MemStorage) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		err := ctx.String(http.StatusOK, s.AllMetrics())

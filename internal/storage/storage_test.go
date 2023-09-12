@@ -23,7 +23,7 @@ func TestUpdateCounter(t *testing.T) {
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
 			s.UpdateCounter(test.metricsName, test.value)
-			assert.Equal(t, counter(test.result), s.counterData[test.metricsName])
+			assert.Equal(t, Counter(test.result), s.counterData[test.metricsName])
 		})
 	}
 }
