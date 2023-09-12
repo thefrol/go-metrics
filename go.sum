@@ -1,5 +1,7 @@
 github.com/alkurbatov/metrics-collector v0.0.0-20230423130316-c2add7fa8e01 h1:5T3o+4sPkkBk7PCJAjnYje66EcgKkQXmgPJ7MNGMFDU=
 github.com/alkurbatov/metrics-collector v0.0.0-20230423130316-c2add7fa8e01/go.mod h1:Jlos4CiMbpMlhBvbrim4N/T6bsUXx4B67toVJb4edhY=
+github.com/caarlos0/env/v6 v6.10.1 h1:t1mPSxNpei6M5yAeu1qtRdPAK29Nbcf/n3G7x+b3/II=
+github.com/caarlos0/env/v6 v6.10.1/go.mod h1:hvp/ryKXKipEkcuYjs9mI4bBCg+UI0Yhgm5Zu0ddvwc=
 github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
