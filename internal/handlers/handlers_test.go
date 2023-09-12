@@ -81,7 +81,8 @@ func TestWebhook(t *testing.T) {
 			assert := assert.New(t)
 			//	Webhook(s)
 			//	e.Start("8080")
-			res, _ := http.Post("http://127.0.0.1:8080"+tc.path, "text/plain", nil)
+			res, err := http.Post("http://127.0.0.1:8080"+tc.path, "text/plain", nil)
+			require.NoError(t, err)
 			assert.Equal(tc.expected.code, res.StatusCode)
 			defer res.Body.Close()
 		})
@@ -117,20 +118,21 @@ func TestAllMetrics(t *testing.T) {
 		},
 	}
 	for _, tc := range tt {
+		e := echo.New()
+		assert := assert.New(t)
+		e.Start("8080")
 		t.Run(tc.name, func(t *testing.T) {
 			//s := storage.New()
-			e := echo.New()
-			assert := assert.New(t)
-			e.Start("8080")
 			//AllMetrics(s)
-			res, _ := http.Get("http://127.0.0.1:8080" + tc.path)
+			res, err := http.Get("http://127.0.0.1:8080" + tc.path)
+			require.NoError(t, err)
 			assert.Equal(tc.expected.code, res.StatusCode)
-
+			defer res.Body.Close()
 			if tc.expected.code == http.StatusOK {
 				respBody, err := io.ReadAll(res.Body)
 				require.NoError(t, err)
 				assert.NotEmpty(len(respBody))
-				defer res.Body.Close()
+
 			}
 		})
 	}
@@ -185,20 +187,20 @@ func TestGetMetric(t *testing.T) {
 			},
 		},
 	}
+
 	for _, tc := range tt {
+		//	s := storage.New()
+		e := echo.New()
+		assert := assert.New(t)
+		//	ValueMetrics(s)
+		e.Start("8080")
 		t.Run(tc.name, func(t *testing.T) {
-			//	s := storage.New()
-			e := echo.New()
-			assert := assert.New(t)
-			//	ValueMetrics(s)
-			e.Start("8080")
 			res, _ := http.Get("http://127.0.0.1:8080" + tc.path)
 			assert.Equal(tc.expected.code, res.StatusCode)
-
+			defer res.Body.Close()
 			if tc.expected.code == http.StatusOK {
 				respBody, err := io.ReadAll(res.Body)
 				require.NoError(t, err)
-				defer res.Body.Close()
 				assert.NotEmpty(string(respBody))
 			}
 		})
