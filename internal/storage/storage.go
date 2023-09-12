@@ -18,7 +18,7 @@ type MemStorage struct {
 	counterData map[string]Counter
 }
 
-// NewNewMemStorage returns a new in memory storage instance.
+// NewMemStorage returns a new in memory storage instance.
 func NewMemStorage() *MemStorage {
 
 	return &MemStorage{
