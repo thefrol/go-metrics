@@ -81,7 +81,7 @@ func TestWebhook(t *testing.T) {
 			assert := assert.New(t)
 			//	Webhook(s)
 			//	e.Start("8080")
-			res, err := http.Post("http://127.0.0.1:8080"+tc.path, "text/plain", nil)
+			res, err := http.Post("http://127.0.0.1:8081"+tc.path, "text/plain", nil)
 			require.NoError(t, err)
 			assert.Equal(tc.expected.code, res.StatusCode)
 			defer res.Body.Close()
@@ -124,7 +124,7 @@ func TestAllMetrics(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			//s := storage.New()
 			//AllMetrics(s)
-			res, err := http.Get("http://127.0.0.1:8080" + tc.path)
+			res, err := http.Get("http://127.0.0.1:8081" + tc.path)
 			require.NoError(t, err)
 			assert.Equal(tc.expected.code, res.StatusCode)
 			defer res.Body.Close()
@@ -189,13 +189,13 @@ func TestGetMetric(t *testing.T) {
 	}
 
 	for _, tc := range tt {
-		//	s := storage.New()
+		//s := storage.NewMemStorage()
 		e := echo.New()
 		assert := assert.New(t)
 		//	ValueMetrics(s)
 		e.Start("8080")
 		t.Run(tc.name, func(t *testing.T) {
-			res, _ := http.Get("http://127.0.0.1:8080" + tc.path)
+			res, _ := http.Get("http://127.0.0.1:8081" + tc.path)
 			assert.Equal(tc.expected.code, res.StatusCode)
 			defer res.Body.Close()
 			if tc.expected.code == http.StatusOK {
@@ -206,3 +206,49 @@ func TestGetMetric(t *testing.T) {
 		})
 	}
 }
+
+//func testRequest(t *testing.T, ts *httptest.Server,
+//	method, path string) (*http.Response, string) {
+//	req, err := http.NewRequest(method, ts.URL+path, nil)
+//	require.NoError(t, err)
+//
+//	resp, err := ts.Client().Do(req)
+//	require.NoError(t, err)
+//	defer resp.Body.Close()
+//
+//	respBody, err := io.ReadAll(resp.Body)
+//	require.NoError(t, err)
+//
+//	return resp, string(respBody)
+//}
+//func TestRouter(t *testing.T) {
+//	e := echo.New()
+//	server := e.Start("localhost")
+//	//ts := httptest.NewServer("ValueMetrics")
+//	//defer ts.Close()
+//
+//	tests := []struct {
+//		method string
+//		url    string
+//		want   string
+//		status int
+//	}{
+//		{"POST", "/update/gauge/alloc/4.0", "", 200},
+//		{"POST", "/wrongMethod/gauge/alloc/4.0", "404 page not found\n", 404},
+//		{"POST", "/update/counter/pollscounter/1", "", 200},
+//		{"POST", "/update/counter/pollscounter/f", "", 400},
+//		{"GET", "/value/gauge/alloc", "4", 200},
+//		{"GET", "/value/counter/pollscounter", "1", 200},
+//		{"GET", "/value/counter/wrong", "", 404},
+//		{"GET", "/value/wrongtype/wrong", "", 400},
+//		{"POST", "/value/counter/pollscounter", "", 405},
+//		{"GET", "/", "alloc: 4\npollscounter: 1\n", 200},
+//	}
+//
+//	for _, test := range tests {
+//		resp, get := testRequest(t, server, test.method, test.url)
+//		defer resp.Body.Close()
+//		assert.Equal(t, test.status, resp.StatusCode)
+//		assert.Equal(t, test.want, get)
+//	}
+//}
