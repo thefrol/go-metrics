@@ -28,7 +28,8 @@ func post(address string, t string, name string, value string) {
 	fmt.Println("Running server on", address)
 	resp, err := http.Post(fmt.Sprintf("http://%s/update/%s/%s/%s", address, t, name, value), "text/plain", bodyReader)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 	defer resp.Body.Close()
 
