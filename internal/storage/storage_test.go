@@ -7,7 +7,7 @@ import (
 )
 
 func TestUpdateCounter(t *testing.T) {
-	s := New()
+	s := NewMemStorage()
 	testCases := []struct {
 		name        string
 		metricsName string
